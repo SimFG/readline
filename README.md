@@ -1,10 +1,3 @@
-[![Build Status](https://travis-ci.org/chzyer/readline.svg?branch=master)](https://travis-ci.org/chzyer/readline)
-[![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg)](LICENSE.md)
-[![Version](https://img.shields.io/github/tag/chzyer/readline.svg)](https://github.com/chzyer/readline/releases)
-[![GoDoc](https://godoc.org/github.com/chzyer/readline?status.svg)](https://godoc.org/github.com/chzyer/readline)
-[![OpenCollective](https://opencollective.com/readline/badge/backers.svg)](#backers)
-[![OpenCollective](https://opencollective.com/readline/badge/sponsors.svg)](#sponsors)
-
 <p align="center">
 <img src="https://raw.githubusercontent.com/chzyer/readline/assets/logo.png" />
 <a href="https://asciinema.org/a/32oseof9mkilg7t7d4780qt4m" target="_blank"><img src="https://asciinema.org/a/32oseof9mkilg7t7d4780qt4m.png" width="654"/></a>
@@ -12,6 +5,9 @@
 </p>
 
 A powerful readline library in `Linux` `macOS` `Windows` `Solaris` `AIX`
+
+## Refine List
+1. [Make the `Aggregate` function clearer in the Runes](https://github.com/chzyer/readline/commit/6c5dee71fb48a02f7c7b31a15718f1aebc9ea880)
 
 ## Guide
 

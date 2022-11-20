@@ -11,6 +11,7 @@ var TabWidth = 4
 
 type Runes struct{}
 
+// EqualRune the `fold` is set the true, which means comparing a and b regardless of case
 func (Runes) EqualRune(a, b rune, fold bool) bool {
 	if a == b {
 		return true
@@ -190,10 +191,10 @@ func (Runes) HasPrefix(r, prefix []rune) bool {
 func (Runes) Aggregate(candicate [][]rune) (same []rune, size int) {
 	for i := 0; i < len(candicate[0]); i++ {
 		for j := 0; j < len(candicate)-1; j++ {
-			if i >= len(candicate[j]) || i >= len(candicate[j+1]) {
+			if i >= len(candicate[j+1]) {
 				goto aggregate
 			}
-			if candicate[j][i] != candicate[j+1][i] {
+			if candicate[0][i] != candicate[j+1][i] {
 				goto aggregate
 			}
 		}
@@ -203,9 +204,7 @@ aggregate:
 	if size > 0 {
 		same = runes.Copy(candicate[0][:size])
 		for i := 0; i < len(candicate); i++ {
-			n := runes.Copy(candicate[i])
-			copy(n, n[size:])
-			candicate[i] = n[:len(n)-size]
+			candicate[i] = runes.Copy(candicate[i][size:])
 		}
 	}
 	return
