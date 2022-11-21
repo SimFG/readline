@@ -59,6 +59,7 @@ const (
 // WaitForResume need to call before current process got suspend.
 // It will run a ticker until a long duration is occurs,
 // which means this process is resumed.
+// TODO confuse dead loop?
 func WaitForResume() chan struct{} {
 	ch := make(chan struct{})
 	var wg sync.WaitGroup
@@ -170,9 +171,7 @@ func readEscKey(r rune, reader *bufio.Reader) *escapeKeyPair {
 	p := escapeKeyPair{}
 	buf := bytes.NewBuffer(nil)
 	for {
-		if r == ';' {
-		} else if unicode.IsNumber(r) {
-		} else {
+		if r != ';' && !unicode.IsNumber(r) {
 			p.typ = r
 			break
 		}
@@ -218,19 +217,19 @@ func SplitByLine(start, screenWidth int, rs []rune) []string {
 	currentWidth := start
 	for _, r := range rs {
 		w := runes.Width(r)
-		currentWidth += w
-		buf.WriteRune(r)
-		if currentWidth >= screenWidth {
+		if currentWidth+w > screenWidth {
 			ret = append(ret, buf.String())
 			buf.Reset()
 			currentWidth = 0
 		}
+		currentWidth += w
+		buf.WriteRune(r)
 	}
 	ret = append(ret, buf.String())
 	return ret
 }
 
-// calculate how many lines for N character
+// LineCount calculate how many lines for N character
 func LineCount(screenWidth, w int) int {
 	r := w / screenWidth
 	if w%screenWidth != 0 {
@@ -293,7 +292,7 @@ func debugList(l *list.List) {
 	}
 }
 
-// append log info to another file
+// Debug append log info to another file
 func Debug(o ...interface{}) {
 	f, _ := os.OpenFile("debug.tmp", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	fmt.Fprintln(f, o...)
