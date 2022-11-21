@@ -22,15 +22,8 @@ func newVimMode(op *Operation) *opVim {
 }
 
 func (o *opVim) SetVimMode(on bool) {
-	if o.cfg.VimMode && !on { // turn off
-		o.ExitVimMode()
-	}
 	o.cfg.VimMode = on
-	o.vimMode = VIM_INSERT
-}
-
-func (o *opVim) ExitVimMode() {
-	o.vimMode = VIM_INSERT
+	o.EnterVimInsertMode()
 }
 
 func (o *opVim) IsEnableVimMode() bool {
@@ -133,7 +126,7 @@ func (o *opVim) handleVimNormalEnterInsert(r rune, readNext func() rune) (t rune
 func (o *opVim) HandleVimNormal(r rune, readNext func() rune) (t rune) {
 	switch r {
 	case CharEnter, CharInterrupt:
-		o.ExitVimMode()
+		o.EnterVimInsertMode()
 		return r
 	}
 
@@ -154,7 +147,7 @@ func (o *opVim) EnterVimInsertMode() {
 	o.vimMode = VIM_INSERT
 }
 
-func (o *opVim) ExitVimInsertMode() {
+func (o *opVim) ExitVimNormalMode() {
 	o.vimMode = VIM_NORMAL
 }
 
@@ -163,7 +156,7 @@ func (o *opVim) HandleVim(r rune, readNext func() rune) rune {
 		return o.HandleVimNormal(r, readNext)
 	}
 	if r == CharEsc {
-		o.ExitVimInsertMode()
+		o.ExitVimNormalMode()
 		return 0
 	}
 

@@ -8,6 +8,7 @@ A powerful readline library in `Linux` `macOS` `Windows` `Solaris` `AIX`
 
 ## Refine List
 1. [Make the `Aggregate` function clearer in the Runes](https://github.com/chzyer/readline/commit/6c5dee71fb48a02f7c7b31a15718f1aebc9ea880)
+2. [Remove the duplicate method in the `vim.go`](https://github.com/chzyer/readline/commit/bf99437e3d6934a53f5ff9ef7769e8c59ec07162)
 
 ## Guide
 
