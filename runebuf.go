@@ -24,7 +24,7 @@ type RuneBuffer struct {
 	interactive bool
 	cfg         *Config
 
-	width int
+	width int // the terminal width
 
 	bck *runeBufferBck
 
@@ -447,6 +447,7 @@ func (r *RuneBuffer) CursorLineCount() int {
 	return r.LineCount(r.width) - r.IdxLine(r.width)
 }
 
+// Refresh confuse
 func (r *RuneBuffer) Refresh(f func()) {
 	r.Lock()
 	defer r.Unlock()
@@ -486,9 +487,10 @@ func (r *RuneBuffer) output() []byte {
 		} else {
 			buf.Write([]byte(string(r.cfg.MaskRune)))
 		}
-		if len(r.buf) > r.idx {
-			buf.Write(r.getBackspaceSequence())
-		}
+		// TODO bugfix
+		//if len(r.buf) > r.idx {
+		//	buf.Write(r.getBackspaceSequence())
+		//}
 
 	} else {
 		for _, e := range r.cfg.Painter.Paint(r.buf, r.idx) {
@@ -509,6 +511,7 @@ func (r *RuneBuffer) output() []byte {
 	return buf.Bytes()
 }
 
+// getBackspaceSequence move cursor
 func (r *RuneBuffer) getBackspaceSequence() []byte {
 	var sep = map[int]bool{}
 
