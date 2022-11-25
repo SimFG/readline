@@ -122,6 +122,8 @@ func (t *Terminal) ioloop() {
 		close(t.outchan)
 	}()
 
+	// TODO confuse isEscapeEx and isEscapeEx?
+	// control the current line, like move the line start/end, or use the previous commond
 	var (
 		isEscape       bool
 		isEscapeEx     bool
@@ -134,17 +136,18 @@ func (t *Terminal) ioloop() {
 		if !expectNextChar {
 			atomic.StoreInt32(&t.isReading, 0)
 			select {
+			// TODO confuse expectNextChar / kickChan meaning?
+			//  kickChan which means the new line or the user kicks the enter key
 			case <-t.kickChan:
 				atomic.StoreInt32(&t.isReading, 1)
 			case <-t.stopChan:
 				return
 			}
 		}
-		expectNextChar = false
+		expectNextChar = true
 		r, _, err := buf.ReadRune()
 		if err != nil {
 			if strings.Contains(err.Error(), "interrupted system call") {
-				expectNextChar = true
 				continue
 			}
 			break
@@ -154,12 +157,10 @@ func (t *Terminal) ioloop() {
 			isEscape = false
 			if r == CharEscapeEx {
 				// ^][
-				expectNextChar = true
 				isEscapeEx = true
 				continue
 			} else if r == CharO {
 				// ^]O
-				expectNextChar = true
 				isEscapeSS3 = true
 				continue
 			}
@@ -176,12 +177,10 @@ func (t *Terminal) ioloop() {
 						default:
 						}
 					}
-					expectNextChar = true
 					continue
 				}
 			}
 			if r == 0 {
-				expectNextChar = true
 				continue
 			}
 		} else if isEscapeSS3 {
@@ -190,12 +189,10 @@ func (t *Terminal) ioloop() {
 				r = escapeSS3Key(key)
 			}
 			if r == 0 {
-				expectNextChar = true
 				continue
 			}
 		}
 
-		expectNextChar = true
 		switch r {
 		case CharEsc:
 			if t.cfg.VimMode {
