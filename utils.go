@@ -19,6 +19,7 @@ var (
 	isWindows = false
 )
 
+// ascii
 const (
 	CharLineStart = 1
 	CharBackward  = 2

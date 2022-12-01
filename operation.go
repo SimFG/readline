@@ -115,6 +115,8 @@ func (o *Operation) ioloop() {
 			r, process = o.GetConfig().FuncFilterInputRune(r)
 			if !process {
 				o.t.KickRead()
+				// TODO confuse
+				// refresh the current output
 				o.buf.Refresh(nil) // to refresh the line
 				continue           // ignore this rune
 			}
@@ -123,9 +125,7 @@ func (o *Operation) ioloop() {
 		if r == 0 { // io.EOF
 			if o.buf.Len() == 0 {
 				o.buf.Clean()
-				select {
-				case o.errchan <- io.EOF:
-				}
+				o.errchan <- io.EOF
 				break
 			} else {
 				// if stdin got io.EOF and there is something left in buffer,
@@ -166,12 +166,11 @@ func (o *Operation) ioloop() {
 		case CharBell:
 			if o.IsSearchMode() {
 				o.ExitSearchMode(true)
-				o.buf.Refresh(nil)
 			}
 			if o.IsInCompleteMode() {
 				o.ExitCompleteMode(true)
-				o.buf.Refresh(nil)
 			}
+			o.buf.Refresh(nil)
 		case CharTab:
 			if o.GetConfig().AutoComplete == nil {
 				o.t.Bell()
@@ -201,11 +200,11 @@ func (o *Operation) ioloop() {
 		case CharKill:
 			o.buf.Kill()
 			keepInCompleteMode = true
-		case MetaForward:
+		case MetaForward: // TODO confuse forward should move to pre word
 			o.buf.MoveToNextWord()
 		case CharTranspose:
 			o.buf.Transpose()
-		case MetaBackward:
+		case MetaBackward: // TODO confuse backward should move to next word
 			o.buf.MoveToPrevWord()
 		case MetaDelete:
 			o.buf.DeleteWord()

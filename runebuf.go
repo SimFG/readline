@@ -16,7 +16,7 @@ type runeBufferBck struct {
 
 type RuneBuffer struct {
 	buf    []rune
-	idx    int
+	idx    int // current cursor position
 	prompt []rune
 	w      io.Writer
 
@@ -85,6 +85,7 @@ func (r *RuneBuffer) SetMask(m rune) {
 	r.Unlock()
 }
 
+// CurrentWidth get the width for the r.buf[:x]
 func (r *RuneBuffer) CurrentWidth(x int) int {
 	r.Lock()
 	defer r.Unlock()
@@ -435,6 +436,7 @@ func (r *RuneBuffer) IdxLine(width int) int {
 	return r.idxLine(width)
 }
 
+// idxLine return the current buf line count
 func (r *RuneBuffer) idxLine(width int) int {
 	if width == 0 {
 		return 0

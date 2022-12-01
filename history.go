@@ -63,6 +63,7 @@ func (o *opHistory) initHistory() {
 }
 
 // only called by newOpHistory
+// historyUpdatePath read the data to the history memory data from the file
 func (o *opHistory) historyUpdatePath(path string) {
 	o.fdLock.Lock()
 	defer o.fdLock.Unlock()
@@ -106,6 +107,7 @@ func (o *opHistory) Rewrite() {
 	o.rewriteLocked()
 }
 
+// rewriteLocked the memory data `history` is written to the file
 func (o *opHistory) rewriteLocked() {
 	if o.cfg.HistoryFile == "" {
 		return
@@ -144,13 +146,14 @@ func (o *opHistory) Close() {
 	}
 }
 
+// FindBck confuse
 func (o *opHistory) FindBck(isNewSearch bool, rs []rune, start int) (int, *list.Element) {
 	for elem := o.current; elem != nil; elem = elem.Prev() {
 		item := o.showItem(elem.Value)
-		if isNewSearch {
-			start += len(rs)
-		}
 		if elem == o.current {
+			if isNewSearch {
+				start += len(rs)
+			}
 			if len(item) >= start {
 				item = item[:start]
 			}
@@ -167,13 +170,14 @@ func (o *opHistory) FindBck(isNewSearch bool, rs []rune, start int) (int, *list.
 func (o *opHistory) FindFwd(isNewSearch bool, rs []rune, start int) (int, *list.Element) {
 	for elem := o.current; elem != nil; elem = elem.Next() {
 		item := o.showItem(elem.Value)
-		if isNewSearch {
-			start -= len(rs)
-			if start < 0 {
-				start = 0
-			}
-		}
 		if elem == o.current {
+			if isNewSearch {
+				start -= len(rs)
+				if start < 0 {
+					start = 0
+				}
+			}
+
 			if len(item)-1 >= start {
 				item = item[start:]
 			} else {
@@ -298,6 +302,7 @@ func (o *opHistory) Revert() {
 	o.current = o.history.Back()
 }
 
+// Update the `current` value
 func (o *opHistory) Update(s []rune, commit bool) (err error) {
 	o.fdLock.Lock()
 	defer o.fdLock.Unlock()
@@ -316,13 +321,14 @@ func (o *opHistory) Update(s []rune, commit bool) (err error) {
 			_, err = o.fd.Write([]byte(string(r.Source) + "\n"))
 		}
 	} else {
-		r.Tmp = append(r.Tmp[:0], s...)
+		r.Tmp = s
 	}
 	o.current.Value = r
 	o.Compact()
 	return
 }
 
+// Push which means `Push(nil)`?
 func (o *opHistory) Push(s []rune) {
 	s = runes.Copy(s)
 	elem := o.history.PushBack(&hisItem{Source: s})

@@ -100,6 +100,7 @@ func PcItemDynamic(callback DynamicCompleteFunc, pc ...PrefixCompleterInterface)
 	}
 }
 
+// Do its function like the `runes.Aggregate`, the return value will remove the common prefix
 func (p *PrefixCompleter) Do(line []rune, pos int) (newLine [][]rune, offset int) {
 	return doInternal(p, line, pos, line)
 }
@@ -148,18 +149,17 @@ func doInternal(p PrefixCompleterInterface, line []rune, pos int, origLine []run
 		return
 	}
 
-	tmpLine := make([]rune, 0, len(line))
-	for i := offset; i < len(line); i++ {
-		if line[i] == ' ' {
-			continue
-		}
-
-		tmpLine = append(tmpLine, line[i:]...)
-		return doInternal(lineCompleter, tmpLine, len(tmpLine), origLine)
-	}
-
 	if goNext {
-		return doInternal(lineCompleter, nil, 0, origLine)
+		tmpLine := make([]rune, 0, len(line))
+		for i := offset; i < len(line); i++ {
+			if line[i] == ' ' {
+				continue
+			}
+
+			tmpLine = append(tmpLine, line[i:]...)
+			break
+		}
+		return doInternal(lineCompleter, tmpLine, len(tmpLine), origLine)
 	}
 	return
 }

@@ -20,7 +20,7 @@ const (
 type opSearch struct {
 	inMode    bool
 	state     int
-	dir       int
+	direction int
 	source    *list.Element
 	w         io.Writer
 	buf       *RuneBuffer
@@ -58,7 +58,7 @@ func (o *opSearch) SearchBackspace() {
 }
 
 func (o *opSearch) findHistoryBy(isNewSearch bool) (int, *list.Element) {
-	if o.dir == S_DIR_BCK {
+	if o.direction == S_DIR_BCK {
 		return o.history.FindBck(isNewSearch, o.data, o.buf.idx)
 	}
 	return o.history.FindFwd(isNewSearch, o.data, o.buf.idx)
@@ -79,13 +79,11 @@ func (o *opSearch) search(isChange bool) bool {
 
 	item := o.history.showItem(o.history.current.Value)
 	start, end := 0, 0
-	if o.dir == S_DIR_BCK {
-		start, end = idx, idx+len(o.data)
-	} else {
-		start, end = idx, idx+len(o.data)
+	start, end = idx, idx+len(o.data)
+	if o.direction != S_DIR_BCK {
 		idx += len(o.data)
 	}
-	o.buf.SetWithIdx(idx, item)
+	o.buf.SetWithIdx(idx, item) // show the search result in the current line
 	o.markStart, o.markEnd = start, end
 	o.SearchRefresh(idx)
 	return true
@@ -96,13 +94,13 @@ func (o *opSearch) SearchChar(r rune) {
 	o.search(true)
 }
 
-func (o *opSearch) SearchMode(dir int) bool {
+func (o *opSearch) SearchMode(direction int) bool {
 	if o.width == 0 {
 		return false
 	}
 	alreadyInMode := o.inMode
 	o.inMode = true
-	o.dir = dir
+	o.direction = direction
 	o.source = o.history.current
 	if alreadyInMode {
 		o.search(false)
@@ -148,9 +146,9 @@ func (o *opSearch) SearchRefresh(x int) {
 	if o.state == S_STATE_FAILING {
 		buf.WriteString("failing ")
 	}
-	if o.dir == S_DIR_BCK {
+	if o.direction == S_DIR_BCK {
 		buf.WriteString("bck")
-	} else if o.dir == S_DIR_FWD {
+	} else if o.direction == S_DIR_FWD {
 		buf.WriteString("fwd")
 	}
 	buf.WriteString("-i-search: ")

@@ -25,8 +25,9 @@ func (t *TabCompleter) Do([]rune, int) ([][]rune, int) {
 }
 
 type opCompleter struct {
-	w     io.Writer
-	op    *Operation
+	w  io.Writer
+	op *Operation
+	// terminal width
 	width int
 
 	inCompleteMode  bool
@@ -142,8 +143,8 @@ func (o *opCompleter) HandleCompleteSelect(r rune) bool {
 	case CharBell, CharInterrupt:
 		o.ExitCompleteMode(true)
 		next = false
-	case CharNext:
-		tmpChoise := o.candidateChoise + o.candidateColNum
+	case CharNext: // handle the next line
+		tmpChoise := o.candidateChoise + o.candidateColNum // candidateColNum, one line contains the candidate num
 		if tmpChoise >= o.getMatrixSize() {
 			tmpChoise -= o.getMatrixSize()
 		} else if tmpChoise >= len(o.candidate) {
@@ -153,7 +154,7 @@ func (o *opCompleter) HandleCompleteSelect(r rune) bool {
 		o.candidateChoise = tmpChoise
 	case CharBackward:
 		o.nextCandidate(-1)
-	case CharPrev:
+	case CharPrev: // handle the prev line
 		tmpChoise := o.candidateChoise - o.candidateColNum
 		if tmpChoise < 0 {
 			tmpChoise += o.getMatrixSize()
@@ -213,7 +214,7 @@ func (o *opCompleter) CompleteRefresh() {
 
 	colIdx := 0
 	lines := 1
-	buf.WriteString("\033[J")
+	buf.WriteString("\033[J") // moves to next line, scrolls the display up if at bottom of the screen.
 	for idx, c := range o.candidate {
 		inSelect := idx == o.candidateChoise && o.IsInCompleteSelectMode()
 		if inSelect {
@@ -224,7 +225,7 @@ func (o *opCompleter) CompleteRefresh() {
 		buf.Write(bytes.Repeat([]byte(" "), colWidth-runes.WidthAll(c)-runes.WidthAll(same)))
 
 		if inSelect {
-			buf.WriteString("\033[0m")
+			buf.WriteString("\033[0m") // restore the style
 		}
 
 		colIdx++
@@ -236,11 +237,12 @@ func (o *opCompleter) CompleteRefresh() {
 	}
 
 	// move back
-	fmt.Fprintf(buf, "\033[%dA\r", lineCnt-1+lines)
-	fmt.Fprintf(buf, "\033[%dC", o.op.buf.idx+o.op.buf.PromptLen())
+	fmt.Fprintf(buf, "\033[%dA\r", lineCnt-1+lines)                 // move cursor up, \r move the line start
+	fmt.Fprintf(buf, "\033[%dC", o.op.buf.idx+o.op.buf.PromptLen()) // move the left
 	buf.Flush()
 }
 
+// aggCandidate no user
 func (o *opCompleter) aggCandidate(candidate [][]rune) int {
 	offset := 0
 	for i := 0; i < len(candidate[0]); i++ {
@@ -272,6 +274,7 @@ func (o *opCompleter) EnterCompleteMode(offset int, candidate [][]rune) {
 }
 
 func (o *opCompleter) ExitCompleteSelectMode() {
+	// TODO remove the candidate
 	o.inSelectMode = false
 	o.candidate = nil
 	o.candidateChoise = -1

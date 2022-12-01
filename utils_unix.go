@@ -1,3 +1,4 @@
+//go:build aix || darwin || dragonfly || freebsd || (linux && !appengine) || netbsd || openbsd || os400 || solaris
 // +build aix darwin dragonfly freebsd linux,!appengine netbsd openbsd os400 solaris
 
 package readline
@@ -20,6 +21,7 @@ type winsize struct {
 // SuspendMe use to send suspend signal to myself, when we in the raw mode.
 // For OSX it need to send to parent's pid
 // For Linux it need to send to myself
+// TODO send stop signal?
 func SuspendMe() {
 	p, _ := os.FindProcess(os.Getppid())
 	p.Signal(syscall.SIGTSTP)
